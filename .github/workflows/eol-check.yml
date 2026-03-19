@@ -1,0 +1,28 @@
+name: eol-check
+
+on: workflow_dispatch
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Debug env
+        run: |
+          echo "Token is set: ${{ secrets.HD_CI_CREDENTIAL != '' }}"
+          echo "Token length: ${#HD_CI_CREDENTIAL}"
+        env:
+          HD_CI_CREDENTIAL: ${{ secrets.HD_CI_CREDENTIAL }}
+
+      - name: Run EOL Scan
+        id: eol
+        uses: mkmrgn/eol-scan-action@v1
+        with:
+          auth-token: ${{ secrets.HD_CI_CREDENTIAL }}
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v5
+        with:
+          name: eol-report
+          path: ${{ steps.eol.outputs.report-path }}
